@@ -1,0 +1,148 @@
+--- 
+packages: 
+  - 
+    order: '01'
+    name: oracleasm-support
+  - 
+    order: '02'
+    name: kmod-oracleasm
+  - 
+    order: '03'
+    name: oracle-rdbms-server-12cR1-preinstall
+kernel_setting:
+  - 
+    name: "kernel.shmmni"
+    value: "4096"
+  -
+    name: "kernel.sem" 
+    value: "250 32000 100 128"
+  - 
+    name: "fs.file-max"
+    value: "6815744"
+  -
+    name: "fs.aio-max-nr"
+    value: "1048576"
+  -
+    name: "net.ipv4.ip_local_port_range"
+    value: "9000 65500"
+  - 
+    name: "net.core.rmem_default"
+    value: "262144"
+  - 
+    name: "net.core.rmem_max"
+    value: "4194304"
+  - 
+    name: "net.core.wmem_default"
+    value: "262144"
+  - 
+    name: "net.core.wmem_max"
+    value: "1048576"
+  - 
+    name: "kernel.panic_on_oops"
+    value: "1"
+os_groups: 
+  - 
+    name: dba
+    gid: "1001"
+  - 
+    name: oper
+    gid: "1003"
+  - 
+    name: oinstall
+    gid: "1002"
+  - 
+    name: asmdba
+    gid: "1004"
+  - 
+    name: asmadmin
+    gid: "1005"
+  - 
+    name: asmoper
+    gid: "1006"
+os_groups_primary: oinstall
+os_users: 
+    - 
+      name: oracle
+      uid: "1001"
+      gid: oinstall
+      groups: 
+        - oinstall
+        - dba
+        - oper
+        - asmdba
+      home: /home/oracle
+      password: $1$DSJ51vh6$4XzzwyIOk6Bi/54kglGk3.
+      comment: "This user Oracle was created by Puppet"
+    - 
+      name: grid
+      uid: "1002"
+      gid: oinstall
+      groups: 
+        - 'oinstall'
+        - 'dba'
+        - 'asmadmin'
+        - 'asmdba'
+        - 'asmoper'
+      home: /home/grid
+      password: $1$DSJ51vh6$4XzzwyIOk6Bi/54kglGk3.
+      comment: "This user grid was created by Puppet"
+limits: 
+  ? "*"
+  : 
+    nproc: 
+      hard: "16384"
+      soft: "2047"
+  oracle: 
+    nofile: 
+      hard: "65536"
+      soft: "1024"
+    nproc: 
+      hard: "16384"
+      soft: "2047"
+    stack: 
+      hard: "10240"
+      soft: "10240"
+directories:
+ - 
+  name: "/u01"
+  owner: "oracle"
+  group: "oinstall"
+  mode: "0775"
+ - 
+  name: "/u02"
+  owner: "oracle"
+  group: "oinstall"
+  mode: "0775"
+oracle_db_os_user: oracle
+oracle_os_group: dba
+oraInventory_dir: /u01/app
+oracle_base_dir: /u01/app/oracle
+oracle_database_dbsnmp_password: Welcome01
+oracle_database_domain_name: example.com
+oracle_database_host: "oel67bare.example.com:1521"
+oracle_database_name: cdb
+oracle_database_file_dest: /u01/oradata
+oracle_database_recovery_dest: /u02/oradata
+oracle_database_service_name: cdb.example.com
+oracle_database_sys_password: Welcome01
+oracle_database_system_password: Welcome01
+oracle_download_dir: /u02/tmp/install
+oracle_home_dir: /u01/app/oracle/product/12.1.0/dbhome_1
+oracle_source: /software
+lvm::volume_groups:
+  oradata1vg:
+    physical_volumes:
+      - /dev/sdb
+    logical_volumes:
+      u01:
+        size: 49G
+        mountpath: /u01
+        mountpath_require: false
+  oradata2vg:
+    physical_volumes:
+      - /dev/sdc
+    logical_volumes:
+      u02:
+        size: 19G
+        mountpath: /u02
+        mountpath_require: false

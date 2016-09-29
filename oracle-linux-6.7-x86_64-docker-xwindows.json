@@ -1,0 +1,138 @@
+{
+  "variables": {
+    "comment": "c:/packer/packer build -only=virtualbox-iso oracle-linux-6.7-x86_64-docker-xwindows.json",
+    "iso_location": "D:/Linux/6.7",
+    "harddisk_size": "80960",
+    "vm_name": "OEL6_7_Docker",
+    "compression": "6"
+  },
+  "builders": [{
+    "vm_name": "{{user `vm_name`}}",
+    "output_directory": "build/{{user `vm_name`}}",
+    "type": "virtualbox-iso",
+    "virtualbox_version_file": ".vbox_version",
+    "headless": false,
+
+    "guest_os_type": "Oracle_64",
+
+    "hard_drive_interface": "sata",
+    "disk_size": "{{user `harddisk_size`}}",
+
+    "iso_url": "{{user `iso_location`}}/V77197-01.iso",
+    "iso_checksum": "DD7231B378F23E2E846AC78B0C5D8974A23631D5",
+    "iso_checksum_type": "sha1",
+
+    "boot_command": [
+      "<tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/OEL6_7-x86_64/ks.cfg<enter><wait>"
+    ],
+    "boot_wait": "12s",
+
+    "http_directory": "http",
+    "guest_additions_path": "VBoxGuestAdditions_{{.Version}}.iso",
+
+    "ssh_username": "vagrant",
+    "ssh_password": "vagrant",
+    "ssh_port": 22,
+    "ssh_wait_timeout": "10000s",
+
+    "vboxmanage": [
+      ["modifyvm", "{{.Name}}", "--memory", "1024"],
+      ["modifyvm", "{{.Name}}", "--cpus", "2"]
+    ],
+
+    "shutdown_command": "echo 'vagrant'|sudo -S /sbin/halt -h -p"
+  },
+  {
+    "type": "vmware-iso",
+    "headless": false,
+
+    "disk_size": "{{user `harddisk_size`}}",
+
+    "iso_url": "{{user `iso_location`}}/V77197-01.iso",
+    "iso_checksum": "DD7231B378F23E2E846AC78B0C5D8974A23631D5",
+    "iso_checksum_type": "sha1",
+
+    "boot_command": [
+      "<tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/OEL6_7-x86_64/ks.cfg<enter><wait>"
+    ],
+    "boot_wait": "12s",
+
+    "http_directory": "http",
+    "tools_upload_flavor": "linux",
+
+    "ssh_username": "vagrant",
+    "ssh_password": "vagrant",
+    "ssh_port": 22,
+    "ssh_wait_timeout": "10000s",
+
+    "vmx_data": {
+        "memsize": "1024",
+        "numvcpus": "2",
+        "vhv.enable": "TRUE"
+    },
+    "shutdown_command": "echo 'vagrant'|sudo -S /sbin/halt -h -p"
+  }],
+  "provisioners": [
+  {
+  "type": "file",
+  "source": "scripts/cert/isubca.cer",
+  "destination": "/tmp/isubca.cer"
+  },
+  {
+  "type": "file",
+  "source": "scripts/cert/irootca.cer",
+  "destination": "/tmp/irootca.cer"
+  },
+  {
+  "type": "file",
+  "source": "scripts/docker-bootstrap/predocker.pp",
+  "destination": "/tmp/predocker.pp"
+  }, 
+  {
+  "type": "file",
+  "source": "scripts/docker-bootstrap/puppetlabs-inifile-1.4.3.tar.gz",
+  "destination": "/tmp/puppetlabs-inifile-1.4.3.tar.gz"
+  },
+  {
+    "type": "shell",
+    "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E bash '{{.Path}}'",
+    "scripts": [
+      "scripts/vagrant.sh",
+      "scripts/cert/centos_6_x_cert.sh",
+      "scripts/puppet-bootstrap/centos_6_x.sh",
+      "scripts/docker-bootstrap/centos_6_x_predocker.sh"
+     ],
+    "override": {
+      "vmware-iso": {
+        "scripts": [
+          "scripts/vagrant.sh",
+          "scripts/puppet-bootstrap/centos_6_x.sh",
+          "scripts/centos_6_x_vmtools.sh",
+          "scripts/centos_6_x_network.sh",
+          "scripts/compact.sh"
+         ]
+       }
+    }
+  },
+  {
+    "type": "shell",
+    "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E bash '{{.Path}}'",
+    "pause_before": "120s",
+    "scripts": [
+      "scripts/docker-bootstrap/centos_6_x.sh",
+      "scripts/vboxguest.sh",
+      "scripts/centos_6_x_network.sh",
+      "scripts/compact.sh"
+    ]
+   }],
+  "post-processors": [{
+    "output": "build/{{user `vm_name`}}-x86_64.box",
+    "type": "vagrant",
+    "only": ["virtualbox-iso"]
+  },
+  {
+    "output": "build/{{user `vm_name`}}-x86_64-{{.Provider}}.box",
+    "type": "vagrant",
+    "only": ["vmware-iso"]
+  }]
+}

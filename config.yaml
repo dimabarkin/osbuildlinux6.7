@@ -1,0 +1,14 @@
+--- 
+disks: 
+  - 
+    description: "For u01 filesystem"
+    file_name: oracle_u01.vdi
+    id: 1
+    shareable: false
+    size_gb: 50
+  - 
+    description: "For u02 filesystem"
+    file_name: oracle_u02.vdi
+    id: 2
+    shareable: false
+    size_gb: 20

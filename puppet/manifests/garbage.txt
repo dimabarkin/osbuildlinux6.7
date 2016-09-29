@@ -1,0 +1,87 @@
+# node default {
+   # include base
+# }
+
+# class base {
+   # yumrepo { "oracleasm":
+      # baseurl => "baseurl=http://yum.oracle.com/repo/OracleASM/RHEL5/\$basearch/",
+      # descr => "Oracle ASMLib Kernel Drivers for Red Hat Enterprise Linux Server 5",
+      # enabled => 1,
+      # gpgcheck => 0,
+   # }
+# }
+
+
+
+/u01/app/oracle/product/12.1.0/dbhome_1/install/root_oel67bare.example.com_2016-02-03_08-09-58.log
+
+
+<initParam name="db_recovery_file_dest" value="<%= @recovery_area_destination %>"/>
+<initParam name="db_recovery_file_dest" value="/u02/oradata"/>
+
+
+/u01/app/oracle/product/12.1.0/dbhome_1/bin/dbca -silent -createDatabase -templateName /u02/tmp/install/dbtemplate_12.1_oraDb.dbt -gdbname cdb.example.com -createAsContainerDatabase true -responseFile NO_VALUE -sysPassword Welcome01 -systemPassword Welcome01 -dbsnmpPassword Welcome01 -asmsnmpPassword Welcome01 -storageType FS -emConfiguration NONE
+
+rm -fR /u01/app/oracle/admin/cdb
+
+
+
+   <CommonAttributes>
+      <option name="OMS" value="false"/>
+      <option name="JSERVER" value="false"/>
+      <option name="SPATIAL" value="false"/>
+      <option name="IMEDIA" value="false"/>
+      <option name="ORACLE_TEXT" value="false">
+         <tablespace id="SYSAUX"/>
+      </option>
+      <option name="XDB_PROTOCOLS" value="false">
+         <tablespace id="SYSAUX"/>
+      </option>
+      <option name="CWMLITE" value="false">
+         <tablespace id="SYSAUX"/>
+      </option>
+      <option name="SAMPLE_SCHEMA" value="true"/>
+      <option name="APEX" value="false"/>
+      <option name="DV" value="false"/>
+   </CommonAttributes>
+
+
+   <CommonAttributes>
+      <option name="OMS" value="false"/>
+      <option name="JSERVER" value="true"/>
+      <option name="SPATIAL" value="false"/>
+      <option name="IMEDIA" value="false"/>
+      <option name="XDB_PROTOCOLS" value="true">
+         <tablespace id="SYSAUX"/>
+      </option>
+      <option name="ORACLE_TEXT" value="false">
+         <tablespace id="SYSAUX"/>
+      </option>
+      <option name="SAMPLE_SCHEMA" value="false"/>
+      <option name="CWMLITE" value="false">
+         <tablespace id="SYSAUX"/>
+      </option>
+      <option name="APEX" value="false">
+         <tablespace id="SYSAUX"/>
+      </option>
+      <option name="DV" value="false">
+         <tablespace id="SYSAUX"/>
+      </option>
+   </CommonAttributes>
+   
+   
+   
+repotrack -a x86_64 -p /repos/Packages   
+
+sudo /etc/init.d/vboxadd setup
+cd /opt
+sudo wget -q -c http://download.virtualbox.org/virtualbox/5.0.12/VBoxGuestAdditions_5.0.12.iso \
+          -O VBoxGuestAdditions.iso
+sudo mount VBoxGuestAdditions.iso -o loop /mnt
+cd /mnt
+sudo sh VBoxLinuxAdditions.run --nox11
+cd /opt
+sudo rm *.iso
+sudo /etc/init.d/vboxadd setup
+sudo chkconfig --add vboxadd
+sudo chkconfig vboxadd on
